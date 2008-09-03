@@ -1,3 +1,5 @@
+require 'theatre/guid'
+
 module Theatre
   class Invocation
     
@@ -9,7 +11,7 @@ module Theatre
     aasm_state :success
     aasm_state :error
 
-    aasm_event :enqueue do
+    aasm_event :queued do
       transitions :from => :new, :to => :queued, :on_transition => :set_queued_time
     end
     
@@ -17,12 +19,12 @@ module Theatre
       transitions :from => :queued, :to => [:success, :error]
     end
     
-    aasm_event(:success) { transitions :from => :running }
-    aasm_event(:error)   { transitions :from => :running }
+    aasm_event(:success) { transitions :from => :running, :to => :success }
+    aasm_event(:error)   { transitions :from => :running, :to => :error }
     
-    attr_reader :queued_time
+    attr_reader :queued_time, :unique_id
     def initialize
-      
+      @unique_id = new_guid.freeze
     end
     
     def current_state

@@ -1,9 +1,21 @@
 Theatre
 =======
 
-A library for choreographing a dynamically-shaping pool of hierarchially organized actors. This was originally extracted from the [Adhearsion](http://adhearsion.com) framework by Jay Phillips.
+Present status: alpha
+
+A library for choreographing a dynamically-shaping pool of hierarchically organized actors. This was originally extracted from the [Adhearsion](http://adhearsion.com) framework by Jay Phillips.
 
 Often in Ruby frameworks it's necessary to expose certain callbacks and have different aspects of the framework publish features for other aspects to consume. In Adhearsion, the framework itself has certain hooks. It's important that these events occur independently of each other.
+
+Motivations and Design Decisions
+--------------------------------
+
+* Must maintain Ruby 1.8 and JRuby compatibility
+* Must be Thread-safe
+* Must support BDD Actor development
+* Must not waste resources with unnecessary Threads
+* Must not get lagged behind because of too few Threads
+* Must allow external persistence in case of a crash
 
 Example
 -------
@@ -17,23 +29,18 @@ Below is an example taken from Adhearsion for executing framework-level callback
 Below is an example of integration with [Stomp](http://stomp.codehaus.org/), a simple yet robust open-protocol message queue.
 
     events.stomp.new_call.each do |event|
-      
+      # Handle all events from the Stomp MQ server whose name is "new_call" (the String)
     end
 
-This will filter all events whose name is "new_call"
-
-Pre-filters and Post-filters
-----------------------------
-
-A Theatre pre-filter is semantically equivalent to a namespace. Registering a callback with a namespace basically sets a custom destination with in a Theatre for actors to act on incoming events.
-
-Creating more messages
+This will filter all events whose name is "new_call" and yield the Stomp::Message to the block.
 
 Framework terminology
 --------------------
 
 Below are definitions of terms I use in Theatre. See the respective links for more information.
 
+* **callback**: This is the block given to the `each` method which handles events coming in.
+* **payload**: This is the "message" sent to the Theatre and is what will ultimately be yielded to the callback
 * **[Actor](http://en.wikipedia.org/wiki/Actor_model)**: This refers to concurrent responders to events in a concurrent system.
 * **[erlang](http://en.wikipedia.org/wiki/Erlang_unit)**: This should not be confused with the functional programming language by Ericsson named Erlang. An erlang is statistical measure of traffic through a single resource which is in continuous use.
 

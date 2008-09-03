@@ -9,9 +9,13 @@ describe "The lifecycle of an Invocation" do
   it "should not have a @queued_time until state becomes :queued" do
     invocation = Theatre::Invocation.new
     invocation.queued_time.should eql(nil)
-    invocation.enqueue!
+    invocation.queued!
     invocation.queued_time.should be_instance_of(Time)
     invocation.current_state.should eql(:queued)
+  end
+  
+  it "should have a valid guid when instantiated" do
+    Theatre::Invocation.new.unique_id.should =~ /^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$/i
   end
   
 end

@@ -36,7 +36,6 @@ module Theatre
       
     end
     
-
   end
   
 end
