@@ -1,3 +1,6 @@
 [submodule "support/aasm"]
 	path = support/aasm
 	url = git://github.com/rubyist/aasm.git
+[submodule "support/yard"]
+	path = support/yard
+	url = git://github.com/lsegal/yard.git

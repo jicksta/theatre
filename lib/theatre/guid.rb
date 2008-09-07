@@ -15,6 +15,8 @@ unless respond_to? :new_guid
     Array.new(length_of_string) { random_character }.join
   end
   
+  # This GUID implementation doesn't adhere to the RFC which wants to make certain segments based on the MAC address of a
+  # network interface card and other wackiness. It's sufficiently random for our needs.
   def new_guid
     [8,4,4,4,12].map { |segment_length| random_string(segment_length) }.join('-')
   end

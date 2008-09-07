@@ -16,15 +16,16 @@ module Theatre
     end
     
     aasm_event :start do
-      transitions :from => :queued, :to => [:success, :error]
+      transitions :from => :queued, :to => [:success, :error], :on_transition => :run!
     end
     
     aasm_event(:success) { transitions :from => :running, :to => :success }
     aasm_event(:error)   { transitions :from => :running, :to => :error }
     
-    attr_reader :queued_time, :unique_id
-    def initialize
+    attr_reader :queued_time, :unique_id, :callback
+    def initialize(callback)
       @unique_id = new_guid.freeze
+      @callback  = callback
     end
     
     def current_state
@@ -36,6 +37,10 @@ module Theatre
     def set_queued_time
       @queued_time = Time.now.freeze
     end
-    
+   
+    def run!
+      @callback.call
+    end
+
   end
 end
