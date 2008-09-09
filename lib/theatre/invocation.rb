@@ -1,6 +1,9 @@
 require 'theatre/guid'
 
 module Theatre
+  
+  ##
+  # An Invocation is an object which Theatre generates and returns from Theatre#handle.
   class Invocation
     
     include AASM
@@ -23,13 +26,26 @@ module Theatre
     aasm_event(:error)   { transitions :from => :running, :to => :error }
     
     attr_reader :queued_time, :unique_id, :callback
-    def initialize(callback)
+    
+    ##
+    # Create a new Invocation/
+    #
+    # @param 
+    def initialize(payload, callback)
+      @payload   = payload
       @unique_id = new_guid.freeze
       @callback  = callback
     end
     
     def current_state
       aasm_current_state
+    end
+    
+    ##
+    # When this Invocation has been queued, started, and entered either the :success or :error state, this method will
+    # finally return. Until then, it blocks the Thread.
+    def wait
+      raise NotImplementedError
     end
     
     protected

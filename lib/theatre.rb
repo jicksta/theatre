@@ -10,7 +10,7 @@ end
 $: << File.expand_path(File.dirname(__FILE__))
 
 require 'theatre/version'
-require 'theatre/namespace'
+require 'theatre/namespace_manager'
 require 'theatre/invocation'
 # require 'theatre/erlang_calculator'
 
@@ -18,12 +18,12 @@ module Theatre
   
   class Theatre
     
-    def initialize(thread_count)
+    def initialize(thread_count=6)
       @thread_count      = thread_count
       @started           = false
-      # @calculator        = ErlangCalculator.new
-      @namespace_manager = NamespaceManager.new
-      @thread_pool       = ThreadPool.new
+      # @calculator      = ErlangCalculator.new
+      @namespace_manager = ActorNamespaceManager.new
+      @thread_group      = ThreadGroup.new
       @master_queue      = Queue.new
     end
     
@@ -35,13 +35,15 @@ module Theatre
     # @param [Object]
     # @raise Theatre::NamespaceNotFound Raised when told to enqueue an unrecognized namespace
     def handle(namespace, payload)
-      callback = NamespaceManager.callback_for_namespace(namespace)
+      callback   = NamespaceManager.callbacks_for_namespace(namespace)
+      invocation = Invocation.new(payload, callback)
+      
       @master_queue << payload
     end
     
     def start!
       @thread_count.times do
-        @thread_pool.add Thread.new(&method(:thread_loop))
+        @thread_group.add Thread.new(&method(:thread_loop))
       end
     end
   
