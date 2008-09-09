@@ -16,7 +16,7 @@ growth_rate = 1.3
 
 # We need to keep a running count of how long it takes to actually dispatch a payload into the theatre.
 handle_count = 0
-average_time = 0.1
+average_time = 0
 
 loop do
   
@@ -30,7 +30,14 @@ loop do
     after_handling = Time.now
     
     handle_times.push after_handling - before_handling
-    # TODO:!!!! UPDATE THE RUNNING AVERAGE
+    
+    # Update the running average
+    #   count / (count+1) = current_average / reduced_average
+    # ∴   reduced_average = (current_average * (count + 1)) / count
+    # 
+    #         new_average = reduced_average + (data / (count + 1))
+    
+    handle_count / (handle_count + 1)
 
     sleep average_time
   
