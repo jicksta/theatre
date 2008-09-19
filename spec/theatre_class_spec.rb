@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + "/spec_helper"
 
 describe "Theatre::Theatre" do
+  
   it "should start the quantity of threads given to its constructor" do
     number_of_threads = 13
     theatre = Theatre::Theatre.new(number_of_threads)
@@ -9,6 +10,21 @@ describe "Theatre::Theatre" do
     flexstub(theatre.send(:instance_variable_get, :@thread_group)).should_receive(:add).and_return
     
     theatre.start!
+  end
+  
+  it "should not spawn new threads when calling start twice" do
+    number_of_threads = 5
+    
+    theatre = Theatre::Theatre.new(number_of_threads)
+    
+    threads = Array.new(number_of_threads) { Thread.new(&theatre.method(:thread_loop)) }
+    flexmock(Thread).should_receive(:new).times(number_of_threads).and_return *threads
+    
+    theatre.start!
+    theatre.start!
+    theatre.start!
+    theatre.start!
+    theatre.graceful_stop!
   end
   
   describe '#thread_loop' do

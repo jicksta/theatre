@@ -12,6 +12,11 @@ module Theatre
   
   class Theatre
     
+    ##
+    # Creates a new stopped Theatre. You must call start!() after you instantiate this for it to begin processing events.
+    #
+    # @param [Fixnum] thread_count Number of Threads to spawn when started.
+    #
     def initialize(thread_count=6)
       @thread_count      = thread_count
       @started           = false
@@ -26,6 +31,7 @@ module Theatre
     # @param [String] namespace The namespace to which the payload should be sent
     # @param [Object] payload The actual content to be sent to the callback
     # @raise Theatre::NamespaceNotFound Raised when told to enqueue an unrecognized namespace
+    #
     def handle(namespace, payload)
       callback   = NamespaceManager.callbacks_for_namespace(namespace)
       invocation = Invocation.new(namespace, callback, payload)
@@ -37,7 +43,9 @@ module Theatre
     # Starts this Theatre.
     #
     # When this method is called, the Threads are spawned and begin pulling messages off this Theatre's master queue.
+    #
     def start!
+      return false if @thread_group.list.any? # Already started
       @started_time = Time.now
       @thread_count.times do
         @thread_group.add Thread.new(&method(:thread_loop))
@@ -48,6 +56,7 @@ module Theatre
     # Notifies all Threads for this Theatre to stop by sending them special messages. Any messages which were queued and
     # unhandled when this method is received will still be processed. Note: you may start this Theatre again later once it
     # has been stopped.
+    #
     def graceful_stop!
       @thread_count.times { @master_queue << :THEATRE_SHUTDOWN! }
       @started_time = nil
