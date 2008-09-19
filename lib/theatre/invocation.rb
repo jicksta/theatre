@@ -57,10 +57,10 @@ module Theatre
     end
    
     def run!
-      if payload.equal? :theatre_no_payload
+      if @payload.equal? :theatre_no_payload
         @callback.call
       else
-        @callback.call payload
+        @callback.call @payload
       end
     end
 

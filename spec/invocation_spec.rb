@@ -39,6 +39,16 @@ end
 
 describe "Using Invocations that've been ran through the Theatre" do
   
+  it "should pass the payload to the callback" do
+    destined_payload = [:i_feel_so_pretty, :OH, :SO, :PRETTY!]
+    expecting_callback = lambda do |payload|
+      payload.should equal(destined_payload)
+    end
+    invocation = Theatre::Invocation.new("/namespace/whatever", expecting_callback, destined_payload)
+    invocation.queued
+    invocation.start
+  end
+  
   describe "While wait()ing, the Invocation" do
     it "should return false to success? and to error?"
     it "should return the callback's return value in wait()"
