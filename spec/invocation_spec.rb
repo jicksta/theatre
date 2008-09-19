@@ -49,10 +49,25 @@ describe "Using Invocations that've been ran through the Theatre" do
     invocation.start
   end
   
-  describe "While wait()ing, the Invocation" do
-    it "should return false to success? and to error?"
-    it "should return the callback's return value in wait()"
+  it "should have a status of :error if an exception was raised and set the #error property" do
+    errorful_callback = lambda { raise ArgumentError } # Simulate logic error
+    invocation = Theatre::Invocation.new("/namespace/whatever", errorful_callback)
+    invocation.queued
+    invocation.start
+    invocation.current_state.should equal(:error)
+    invocation.should be_error
+    invocation.error.should be_instance_of(ArgumentError)
   end
+
+  it "should have a status of :success if no expection was raised" do
+    callback = lambda { "No errors raised here!" }
+    invocation = Theatre::Invocation.new("/namespace/whatever", callback)
+    invocation.queued
+    invocation.start
+    invocation.current_state.should equal(:success)
+    invocation.should be_success
+  end
+  
 end
 
 BEGIN {

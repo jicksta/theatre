@@ -1,12 +1,6 @@
 require 'thread'
 require 'rubygems'
 
-begin
-  require File.dirname(__FILE__) + "/../support/aasm/lib/aasm.rb"
-rescue LoadError
-  abort 'Could not require() AASM! Did you do type "git submodule update --init" to download it?'
-end
-
 $: << File.expand_path(File.dirname(__FILE__))
 
 require 'theatre/version'
