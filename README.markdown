@@ -1,7 +1,7 @@
 Theatre
 =======
 
-Present status: alpha
+Present status: **beta**
 
 A library for choreographing a dynamically-shaping pool of hierarchically organized actors. This was originally extracted from the [Adhearsion](http://adhearsion.com) framework by Jay Phillips.
 
