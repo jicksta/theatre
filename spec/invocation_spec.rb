@@ -31,3 +31,10 @@ describe "The lifecycle of an Invocation" do
   end
   
 end
+
+describe "Using Invocations that've been ran through the Theatre" do
+  describe "While wait()ing, the Invocation" do
+    it "should return false to success? and to error?"
+    it "should return the callback's return value in wait()"
+  end
+end

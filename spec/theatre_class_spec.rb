@@ -12,17 +12,50 @@ describe "Theatre::Theatre" do
   end
   
   describe '#thread_loop' do
-    it "should start each Invocation it receives"
     
     it "should continue looping even after an exception been raised" do
-      raiser  = lambda { raise }
+      mock_invocation = flexmock "mock Invocation which raises when started"
+      mock_invocation.should_receive(:start).once.and_raise ArgumentError # Simulate logic error
+      
+      theatre = Theatre::Theatre.new
+      master_queue = theatre.send(:instance_variable_get, :@master_queue)
+      flexmock(theatre).should_receive(:loop).once.and_yield
+      flexmock(master_queue).should_receive(:pop).once.and_return mock_invocation
+      
+      lambda do
+        theatre.send(:thread_loop).should equal(:stopped)
+      end.should_not raise_error(ArgumentError)
+    end
+    
+    it "should run the callback of the Invocation it receives from the master_queue" do
+      has_executed = false
+      thrower    = lambda { has_executed = true }
+      namespace  = "/foo/bar"
+      payload    = [1,2,3]
+      
+      invocation = Theatre::Invocation.new(payload, namespace, thrower)
+      invocation.queued
       
       theatre = Theatre::Theatre.new
       
-      flexmock(theatre).should_receive(:loop).twice.and_yield
+      master_queue = theatre.send(:instance_variable_get, :@master_queue)
       
-      theatre.handle
+      flexmock(theatre).should_receive(:loop).and_yield
+      flexmock(master_queue).should_receive(:pop).once.and_return invocation
+      
+      theatre.send :thread_loop
+      
+      has_executed.should equal(true)
     end
+    
+    it "should stop when receiving the shutdown command and return :stopped" do
+      theatre = Theatre::Theatre.new
+      master_queue = theatre.send(:instance_variable_get, :@master_queue)
+      flexmock(theatre).should_receive(:loop).once.and_yield
+      flexmock(master_queue).should_receive(:pop).once.and_return :THEATRE_SHUTDOWN!
+      theatre.send(:thread_loop).should equal(:stopped)
+    end
+    
   end
   
 end

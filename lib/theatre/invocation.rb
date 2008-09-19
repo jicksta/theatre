@@ -25,13 +25,15 @@ module Theatre
     aasm_event(:success) { transitions :from => :running, :to => :success }
     aasm_event(:error)   { transitions :from => :running, :to => :error }
     
-    attr_reader :queued_time, :unique_id, :callback
+    attr_reader :queued_time, :unique_id, :callback, :namespace
     
     ##
-    # Create a new Invocation/
+    # Create a new Invocation.
     #
-    # @param 
-    def initialize(payload, callback)
+    # @param [Object] payload
+    # @param [String] namespace The "/foo/bar/qaz" path to the namespace to which this Invocation belongs.
+    # @param [Proc] callback The block which should be executed by an Actor scheduler.
+    def initialize(payload, namespace, callback)
       @payload   = payload
       @unique_id = new_guid.freeze
       @callback  = callback
