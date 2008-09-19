@@ -33,7 +33,7 @@ describe "Theatre::Theatre" do
       namespace  = "/foo/bar"
       payload    = [1,2,3]
       
-      invocation = Theatre::Invocation.new(payload, namespace, thrower)
+      invocation = Theatre::Invocation.new(namespace, thrower, payload)
       invocation.queued
       
       theatre = Theatre::Theatre.new

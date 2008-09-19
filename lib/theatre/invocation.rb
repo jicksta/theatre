@@ -30,10 +30,10 @@ module Theatre
     ##
     # Create a new Invocation.
     #
-    # @param [Object] payload
     # @param [String] namespace The "/foo/bar/qaz" path to the namespace to which this Invocation belongs.
     # @param [Proc] callback The block which should be executed by an Actor scheduler.
-    def initialize(payload, namespace, callback)
+    # @param [Object] payload The message that will be sent to the callback for processing.
+    def initialize(namespace, callback, payload=:theatre_no_payload)
       @payload   = payload
       @unique_id = new_guid.freeze
       @callback  = callback
@@ -57,7 +57,11 @@ module Theatre
     end
    
     def run!
-      @callback.call
+      if payload.equal? :theatre_no_payload
+        @callback.call
+      else
+        @callback.call payload
+      end
     end
 
   end

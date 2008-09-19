@@ -34,7 +34,7 @@ module Theatre
     # @raise Theatre::NamespaceNotFound Raised when told to enqueue an unrecognized namespace
     def handle(namespace, payload)
       callback   = NamespaceManager.callbacks_for_namespace(namespace)
-      invocation = Invocation.new(payload, namespace, callback)
+      invocation = Invocation.new(namespace, callback, payload)
       
       @master_queue << payload
     end
