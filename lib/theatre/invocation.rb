@@ -4,24 +4,8 @@ module Theatre
   
   ##
   # An Invocation is an object which Theatre generates and returns from Theatre#handle.
+  #
   class Invocation
-    
-    # aasm_state :new
-    # aasm_state :queued
-    # aasm_state :running
-    # aasm_state :success
-    # aasm_state :error
-
-    # aasm_event :queued do
-    #   transitions :from => :new, :to => :queued, :on_transition => :set_queued_time
-    # end
-    
-    # aasm_event :start do
-    #   transitions :from => :queued, :to => :running
-    # end
-    
-    # aasm_event(:success) { transitions :from => :running, :to => :success }
-    # aasm_event(:failed)  { transitions :from => :running, :to => :error }
     
     attr_reader :queued_time, :unique_id, :callback, :namespace, :error
     

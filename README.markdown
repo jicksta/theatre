@@ -73,8 +73,3 @@ Implementation notes
 --------------------
 
 Theatre uses the Ruby standard library class Queue to orchestrate the message passing system.
-
-Notes on AASM
--------------
-
-Theatre uses AASM behind internally to manage finite state machines. The library is somewhat undocumented therefore relevant documentation should be placed here.
