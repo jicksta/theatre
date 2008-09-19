@@ -7,23 +7,44 @@ describe "ActorNamespaceManager" do
     nm.register_namespace_name "/foo/bar/qaz"
     nm.search_for_namespace("/foo/bar/qaz").should be_kind_of(Theatre::ActorNamespaceManager::NamespaceNode)
   end
+
+  describe '::normalize_path_to_array' do
+    it "should split a standard path properly" do
+      Theatre::ActorNamespaceManager.normalize_path_to_array("/foo/bar/qaz").should == [:foo, :bar, :qaz]
+    end
+    
+    it "should split out Array()'d form of a String path properly" do
+      Theatre::ActorNamespaceManager.normalize_path_to_array(["/jay/thomas/phillips"]).should == [:jay,:thomas,:phillips]
+    end
+  end
+  
+  
 end
 
 describe "NamespaceNode" do
   
   it "when registering a new namespace, the new NamespaceNode should be returned" do
-    node.register_namespace_name("foobar").should be_instance_of(Theatre::NamespaceManager::NamespaceNode)
+    node = Theatre::ActorNamespaceManager::NamespaceNode.new "foobar"
+    node.register_namespace_name("foobar").should be_instance_of(Theatre::ActorNamespaceManager::NamespaceNode)
   end
   
   it "should not blow away an existing callback when registering a new one with the same name" do
     name = "blah"
-    node = Theatre::NamespaceManager::NamespaceNode.new
+    node = Theatre::ActorNamespaceManager::NamespaceNode.new name
     node.register_namespace_name name
     before = node.child_named(name)
-    before.should be_instance_of(Theatre::NamespaceManager::NamespaceNode)
+    before.should be_instance_of(Theatre::ActorNamespaceManager::NamespaceNode)
     node.register_namespace_name name
     before.should eql(node.child_named(name))
   end
+  
+  describe '#register_namespace_name' do
+    it "should return the NamespaceNode" do
+      Theatre::ActorNamespaceManager::NamespaceNode.new("foo").register_namespace_name("bar").should \
+          be_instance_of(Theatre::ActorNamespaceManager::NamespaceNode)
+    end
+  end
+  
 end
 
 describe Theatre::EventNamespace do
