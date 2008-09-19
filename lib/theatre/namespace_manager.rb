@@ -2,15 +2,22 @@ require 'theatre/namespace'
 
 module Theatre
   
-  ##
-  # Handles hierarchial registration of the namespaces. It implements a simple binary tree.
-  class NamespaceManager
+  class ActorNamespaceManager
+
+    VALID_NAMESPACE = %r{^(/[\w_]+)+$}
     
+    class << self
+      def valid_namespace_path?(namespace_path)
+        namespace_path =~ VALID_NAMESPACE
+      end
+    end
+    
+
     def initalize
       @registry_lock = Mutex.new
       @root          = NamespaceNode.new
     end
-    
+
     ## 
     # Have this registry recognize a new path and prepare it for callback registrations
     #
@@ -68,7 +75,7 @@ module Theatre
       end
       
       def register_namespace_name(name)
-        @children[name] = {} unless @children.has_key? name
+        @children[name] = NamespaceNode.new(name) unless @children.has_key? name
       end
       
       def register_callback(callback)
@@ -95,6 +102,7 @@ module Theatre
     end
     
   end
+  
   
   class NamespaceNotFound < Exception
     def initialize(full_path)
