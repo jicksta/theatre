@@ -38,6 +38,7 @@ module Theatre
     #
     # When this method is called, the Threads are spawned and begin pulling messages off this Theatre's master queue.
     def start!
+      @started_time = Time.now
       @thread_count.times do
         @thread_group.add Thread.new(&method(:thread_loop))
       end
@@ -49,6 +50,7 @@ module Theatre
     # has been stopped.
     def graceful_stop!
       @thread_count.times { @master_queue << :THEATRE_SHUTDOWN! }
+      @started_time = nil
     end
     
     protected
