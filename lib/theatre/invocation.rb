@@ -7,7 +7,7 @@ module Theatre
   #
   class Invocation
     
-    attr_reader :queued_time, :unique_id, :callback, :namespace, :error
+    attr_reader :queued_time, :started_time, :finished_time, :unique_id, :callback, :namespace, :error, :returned_value
     
     ##
     # Create a new Invocation.
@@ -43,8 +43,10 @@ module Theatre
         @current_state = :running
       end
       
+      @started_time = Time.now.freeze
+      
       begin
-        if @payload.equal? :theatre_no_payload
+        @returned_value = if @payload.equal? :theatre_no_payload
           @callback.call
         else
           @callback.call @payload
@@ -52,7 +54,14 @@ module Theatre
         with_state_lock { @current_state = :success }
       rescue => @error
         with_state_lock { @current_state = :error }
+      ensure
+        @finished_time = Time.now.freeze
       end
+    end
+    
+    def execution_duration
+      return nil unless @finished_time
+      @finished_time - @started_time
     end
     
     def error?

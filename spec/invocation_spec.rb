@@ -68,11 +68,74 @@ describe "Using Invocations that've been ran through the Theatre" do
     invocation.should be_success
   end
   
+  it "should set the #returned_value property to the returned value callback when a payload was given" do
+    doubler = lambda { |num| num * 2 }
+    invocation = Theatre::Invocation.new('/foo/bar', doubler, 5)
+    invocation.queued
+    invocation.start
+    invocation.returned_value.should equal(10)
+  end
+  
+  it "should set the #returned_value property to the returned value callback when a payload was NOT given" do
+    doubler = lambda { :ohai }
+    invocation = Theatre::Invocation.new('/foo/bar', doubler)
+    invocation.queued
+    invocation.start
+    invocation.returned_value.should equal(:ohai)
+  end
+  
+  it "should set the #finished_time property when a success was encountered" do
+    block = lambda {}
+    invocation = Theatre::Invocation.new('/foo/bar', block)
+    invocation.queued
+    
+    now = Time.now
+    flexmock(Time).should_receive(:now).twice.and_return now
+    
+    invocation.start
+    invocation.should be_success
+  end
+  
+  it "should set the #finished_time property when a failure was encountered" do
+    block = lambda { raise LocalJumpError }
+    invocation = Theatre::Invocation.new('/foo/bar', block)
+    invocation.queued
+    
+    now = Time.now
+    flexmock(Time).should_receive(:now).twice.and_return now
+    
+    invocation.start
+    invocation.should be_error
+  end
+  
+  it "should set the #started_time property after starting" do
+    invocation = Theatre::Invocation.new('/foo/bar', lambda { sleep 0.01 } )
+    invocation.queued
+    invocation.started_time.should be_nil
+    invocation.start
+    invocation.started_time.should be_kind_of(Time)
+  end
+  
+  it "should properly calculate #execution_duration" do
+    time_ago_difference = 60 * 5 # Five minutes
+    time_now = Time.now
+    time_ago = time_now - time_ago_difference
+    
+    invocation = Theatre::Invocation.new('/foo/bar', lambda {} )
+    invocation.queued
+    invocation.start
+    
+    invocation.send(:instance_variable_set, :@started_time, time_ago)
+    invocation.send(:instance_variable_set, :@finished_time, time_now)
+    
+    invocation.execution_duration.should be_close(time_ago_difference.to_f, 0.01)
+  end
+  
 end
 
 BEGIN {
   module InvocationTestHelper
-    def new_invocation
+    def new_invocation(payload=@payload)
       Theatre::Invocation.new(@namespace, @block, @payload)
     end
   end
