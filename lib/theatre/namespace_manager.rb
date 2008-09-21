@@ -2,6 +2,9 @@ require 'theatre/namespace'
 
 module Theatre
   
+  ##
+  # Manages the hierarchial namespaces of a Theatre. This class is Thread-safe.
+  #
   class ActorNamespaceManager
 
     VALID_NAMESPACE = %r{^(/[\w_]+)+$}
@@ -29,12 +32,16 @@ module Theatre
       @registry_lock = Mutex.new
       @root          = RootNamespaceNode.new
     end
-
+    
     ## 
-    # Have this registry recognize a new path and prepare it for callback registrations
+    # Have this registry recognize a new path and prepare it for callback registrations. All path segements will be created
+    # in order. For example, when registering "/foo/bar/qaz" when no namespaces at all have been registered, this method will
+    # first register "foo", then "bar", then "qaz". If the namespace was already registered, it will not be affected.
     #
     # @param [String, Array] paths The namespace to register. Can be in "/foo/bar" or *[foo,bar] format
+    # @return [NamespaceNode] The NamespaceNode representing the path given.
     # @raise NamespaceNotFound if a segment has not been registered yet
+    #
     def register_namespace_name(*paths)
       paths = self.class.normalize_path_to_array paths
       
@@ -47,6 +54,7 @@ module Theatre
     # Returns a Proc found after searching with the namespace you provide
     #
     # @raise NamespaceNotFound if a segment has not been registered yet
+    #
     def callback_for_namespaces(*paths)
       search_for_namespace(paths).callbacks
     end
@@ -54,17 +62,31 @@ module Theatre
     ##
     # Find a namespace in the tree.
     #
-    # @param [Array] paths Must be an Array of segments
+    # @param [Array, String] paths Must be an Array of segments or a name like "/foo/bar/qaz"
     # @raise NamespaceNotFound if a segment has not been registered yet
+    #
     def search_for_namespace(paths)
       paths = self.class.normalize_path_to_array paths
       path_string = "/"
       
-      paths.inject(@root) do |last_node,this_node_name|
+      found_namespace = paths.inject(@root) do |last_node,this_node_name|
         raise NamespaceNotFound.new(path_string) if last_node.nil?
         path_string << this_node_name.to_s
         last_node.child_named this_node_name
       end
+      raise NamespaceNotFound.new("/#{paths.join('/')}") unless found_namespace
+      found_namespace
+    end
+    
+    ##
+    # Registers the given callback at a namespace, assuming the namespace was already registered.
+    #
+    # @param [Array] paths Must be an Array of segments
+    # @param [Proc] callback 
+    # @raise NamespaceNotFound if a segment has not been registered yet
+    #
+    def register_callback_at_namespace(paths, callback)
+      search_for_namespace(paths).register_callback callback
     end
     
     protected
@@ -122,7 +144,6 @@ module Theatre
     end
     
   end
-  
   
   class NamespaceNotFound < Exception
     def initialize(full_path)

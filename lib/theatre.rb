@@ -13,6 +13,8 @@ module Theatre
   
   class Theatre
     
+    attr_reader :namespace_manager
+    
     ##
     # Creates a new stopped Theatre. You must call start!() after you instantiate this for it to begin processing events.
     #

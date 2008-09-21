@@ -23,4 +23,15 @@ class Example
     File.read @file
   end
   
+  def register_namespaces_on(obj)
+    obj = obj.namespace_manager if obj.kind_of? Theatre::Theatre
+    namespaces = metadata["namespaces"]
+    if namespaces && namespaces.kind_of?(Array) && namespaces.any?
+      namespaces.each do |namespace|
+        obj.register_namespace_name namespace
+      end
+    end
+    obj
+  end
+  
 end

@@ -4,16 +4,23 @@ describe "CallbackDefinitionContainer" do
   
   it "should successfully load the :simple_before_call example" do
     example = Example.new(:simple_before_call)
-    loader  = Theatre::CallbackDefinitionLoader.from_file example.file
-    normalized = loader.normalize!
-    normalized.should have(1).item
-    normalized.first.last.should be_instance_of(Proc)
-    normalized.first.first.should == [[:asterisk], [:before_call]]
+    theatre = Theatre::Theatre.new
+    example.register_namespaces_on theatre
+    
+    flexmock(theatre.namespace_manager).should_receive(:register_callback_at_namespace).
+        with([:asterisk, :before_call], Proc).once
+    
+    loader  = Theatre::CallbackDefinitionLoader.new(theatre)
+    loader.load_events_file example.file
   end
   
   it "should let you override the recorder method name" do
-    loader = Theatre::CallbackDefinitionLoader.new(:roflcopter)
-    flexmock(loader).should_receive(:callback_registered).once
+    theatre = Theatre::Theatre.new
+    theatre.namespace_manager.register_namespace_name "/foo/bar/qaz"
+    flexmock(theatre.namespace_manager).should_receive(:register_callback_at_namespace).
+        with([:foo, :bar, :qaz], Proc).once
+    
+    loader = Theatre::CallbackDefinitionLoader.new(theatre, :roflcopter)
     loader.roflcopter.foo.bar.qaz.each {}
   end
   
@@ -25,7 +32,7 @@ describe "Adhearsion-esque usages of Theatre" do
   it "should work with Asterisk before_call things" do
     channel = "SIP/jicksta-12bb32h1"
     example = Example.new(:simple_before_call).file
-    pending "Coming soon"
+    pending "need to think stuff out more"
     begin
       container.start!
       
@@ -41,4 +48,18 @@ end
 
 describe "Stomp-esque usage of Theatre" do
   it "should make it easy to register new namespace listeners"
+end
+
+describe "Misuses of the Theatre" do
+  
+  it "should not allow callbacks to be registered for namespaces which have not been registered" do
+    theatre = Theatre::Theatre.new
+    example = Example.new(:simple_before_call)
+    
+    loader = Theatre::CallbackDefinitionLoader.new(theatre)
+    lambda do
+      loader.events.foo.each {}
+    end.should raise_error(Theatre::NamespaceNotFound)
+  end
+  
 end

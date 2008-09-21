@@ -7,6 +7,24 @@ describe "ActorNamespaceManager" do
     nm.register_namespace_name "/foo/bar/qaz"
     nm.search_for_namespace("/foo/bar/qaz").should be_kind_of(Theatre::ActorNamespaceManager::NamespaceNode)
   end
+  
+  it "should return the new namespace when registering it" do
+    
+  end
+
+  it "#search_for_namespace should raise a NamespaceNotFound exception if a namespace one level deep was not found" do
+    nm = Theatre::ActorNamespaceManager.new
+    lambda do
+      nm.search_for_namespace "/foo"
+    end.should raise_error(Theatre::NamespaceNotFound)
+  end
+
+  it "#search_for_namespace should raise a NamespaceNotFound exception if a namespace two levels deep was not found" do
+    nm = Theatre::ActorNamespaceManager.new
+    lambda do
+      nm.search_for_namespace "/foo/bar"
+    end.should raise_error(Theatre::NamespaceNotFound)
+  end
 
   describe '::normalize_path_to_array' do
     it "should split a standard path properly" do

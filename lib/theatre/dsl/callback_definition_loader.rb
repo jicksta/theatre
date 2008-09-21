@@ -5,45 +5,11 @@ module Theatre
   #
   class CallbackDefinitionLoader
     
-    class << self
-      
-      ##
-      # Parses the given Ruby source code file and returns a new CallbackDefinitionLoader.
-      #
-      # @param [String, File] file The filename or File object for the Ruby source code file to parse.
-      #
-      def from_file(file)
-        new.load_events_file(file)
-      end
-      
-      ##
-      # Parses the given Ruby source code and returns a new CallbackDefinitionLoader.
-      #
-      # NOTE: Only use this if you're generating the code yourself! If you're loading a file from the filesystem, you should
-      # use from_file() since from_file will properly attribute errors in the code to the file from which the code was 
-      # loaded.
-      #
-      # @param [String] code The Ruby source code to parse
-      #
-      def from_events_code(code)
-        new.load_code code
-      end
-    end
-    
-    attr_reader :root_name
-    def initialize(root_name=:events)
+    attr_reader :theatre, :root_name
+    def initialize(theatre, root_name=:events)
+      @theatre = theatre
       @root_name = root_name
-      @callbacks = []
       create_recorder_method root_name
-    end
-    
-    ##
-    # Converts all definitions this object has received into a two dimensional Array.
-    #
-    # The second dimension is in the format ["/some/namespace/here", (the Proc callback)]
-    #
-    def normalize!
-      @callbacks
     end
     
     def anonymous_recorder
@@ -77,9 +43,15 @@ module Theatre
     
     protected
     
+    ##
+    # Immediately register the namespace and callback with the Theatre instance given to the constructor. This method is only
+    # called when a new BlankSlateMessageRecorder is instantiated and receives #each().
+    #
     def callback_registered(namespaces, callback)
-      # namespaces looks like [:foobar, 123]
-      @callbacks << [namespaces, callback]
+      # Get rid of all arguments passed to the namespaces. Will support arguments in the future.
+      namespaces = namespaces.map { |namespace| namespace.first }
+      
+      theatre.namespace_manager.register_callback_at_namespace namespaces, callback
     end
     
     def create_recorder_method(record_method_name)
