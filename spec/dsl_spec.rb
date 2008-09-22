@@ -28,28 +28,6 @@ end
 
 # High level specs to test the entire library.
 
-describe "Adhearsion-esque usages of Theatre" do
-  it "should work with Asterisk before_call things" do
-    channel = "SIP/jicksta-12bb32h1"
-    example = Example.new(:simple_before_call).file
-    pending "need to think stuff out more"
-    begin
-      container.start!
-      
-      mock_call = flexmock "mock call"
-      mock_call.should_receive(:[]).once.with(:channel).and_return channel
-      
-      container.handle "/asterisk/before_call", mock_call
-    ensure
-      container.graceful_stop!
-    end
-  end
-end
-
-describe "Stomp-esque usage of Theatre" do
-  it "should make it easy to register new namespace listeners"
-end
-
 describe "Misuses of the Theatre" do
   
   it "should not allow callbacks to be registered for namespaces which have not been registered" do
