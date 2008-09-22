@@ -1,3 +1,0 @@
-[submodule "support/yard"]
-	path = support/yard
-	url = git://github.com/lsegal/yard.git
