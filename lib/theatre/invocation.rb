@@ -1,4 +1,6 @@
 require 'theatre/guid'
+require 'thread'
+require 'monitor'
 
 module Theatre
   
@@ -22,6 +24,12 @@ module Theatre
       @callback      = callback
       @current_state = :new
       @state_lock    = Mutex.new
+      
+      # Used just to protect access to the @returned_value instance variable
+      @returned_value_lock = Monitor.new
+      
+      # Used when wait() is called to notify all waiting threads by using a ConditionVariable
+      @returned_value_blocker = Monitor::ConditionVariable.new @returned_value_lock
     end
     
     def queued
@@ -46,7 +54,7 @@ module Theatre
       @started_time = Time.now.freeze
       
       begin
-        @returned_value = if @payload.equal? :theatre_no_payload
+        self.returned_value = if @payload.equal? :theatre_no_payload
           @callback.call
         else
           @callback.call @payload
@@ -76,11 +84,32 @@ module Theatre
     # When this Invocation has been queued, started, and entered either the :success or :error state, this method will
     # finally return. Until then, it blocks the Thread.
     #
+    # @return [Object] The result of invoking this Invocation's callback
+    #
     def wait
-      raise NotImplementedError
+      with_returned_value_lock { return @returned_value if defined? @returned_value }
+      @returned_value_blocker.wait
+      # Return the returned_value
+      with_returned_value_lock { @returned_value }
     end
     
     protected
+    
+    ##
+    # Protected setter which does some other housework when the returned value is found (such as notifying wait()ers)
+    #
+    # @param [returned_value] The value to set this returned value to.
+    #
+    def returned_value=(returned_value)
+      with_returned_value_lock do
+        @returned_value = returned_value
+        @returned_value_blocker.broadcast
+      end
+    end
+    
+    def with_returned_value_lock(&block)
+      @returned_value_lock.synchronize(&block)
+    end
     
     def with_state_lock(&block)
       @state_lock.synchronize(&block)

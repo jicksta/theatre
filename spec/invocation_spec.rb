@@ -131,6 +131,33 @@ describe "Using Invocations that've been ran through the Theatre" do
     invocation.execution_duration.should be_close(time_ago_difference.to_f, 0.01)
   end
   
+  it "should return the set value of returned_value when one has been set to a non-nil value" do
+    return_nil = lambda { 123 }
+    invocation = Theatre::Invocation.new("/namespace/whatever", return_nil)
+    invocation.queued
+    invocation.start
+    invocation.returned_value.should eql(123)
+  end
+  
+  it "should return nil for returned_value when it has been set to nil" do
+    return_nil = lambda { nil }
+    invocation = Theatre::Invocation.new("/namespace/whatever", return_nil)
+    invocation.queued
+    invocation.start
+    invocation.returned_value.should eql(nil)
+  end
+  
+  it "waiting on an Invocation should execute properly" do
+    wait_on_invocation = lambda { 123 }
+    invocation = Theatre::Invocation.new("/namespace/whatever", wait_on_invocation)
+    Thread.new do
+      invocation.queued
+      invocation.start
+    end
+    invocation.wait.should eql(123)
+    invocation.success?.should eql(true)
+  end
+  
 end
 
 BEGIN {
