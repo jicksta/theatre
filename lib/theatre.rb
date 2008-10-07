@@ -7,7 +7,6 @@ require 'theatre/version'
 require 'theatre/namespace_manager'
 require 'theatre/invocation'
 require 'theatre/dsl/callback_definition_loader'
-# require 'theatre/erlang_calculator'
 
 module Theatre
   

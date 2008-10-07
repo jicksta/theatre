@@ -1,7 +1,7 @@
 module Theatre
   
   ##
-  # New instances of this class make
+  # This class provides the a wrapper aroung which an events.rb file can be instance_eval'd.
   #
   class CallbackDefinitionLoader
     
