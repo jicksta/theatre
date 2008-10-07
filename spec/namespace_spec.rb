@@ -65,7 +65,7 @@ describe "NamespaceNode" do
   
 end
 
-describe Theatre::EventNamespace do
+describe "Valid namespace segments" do
   
   include NamespaceHelper
   

@@ -1,5 +1,3 @@
-require 'theatre/namespace'
-
 module Theatre
   
   ##
