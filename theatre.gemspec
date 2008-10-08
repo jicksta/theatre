@@ -9,7 +9,6 @@ THEATRE_FILES = %w[
   lib/theatre/dsl/callback_definition_loader.rb
   lib/theatre/guid.rb
   lib/theatre/invocation.rb
-  lib/theatre/namespace.rb
   lib/theatre/namespace_manager.rb
   lib/theatre/version.rb
   theatre.gemspec
