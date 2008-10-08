@@ -5,7 +5,7 @@ require 'monitor'
 module Theatre
   
   ##
-  # An Invocation is an object which Theatre generates and returns from Theatre#handle.
+  # An Invocation is an object which Theatre generates and returns from Theatre#trigger.
   #
   class Invocation
     

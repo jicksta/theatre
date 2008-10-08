@@ -15,7 +15,7 @@ start_time  = Time.now
 growth_rate = 1.3
 
 # We need to keep a running count of how long it takes to actually dispatch a payload into the theatre.
-handle_count = 0
+trigger_count = 0
 average_time = 0
 
 loop do
@@ -26,10 +26,10 @@ loop do
   times_per_second.times do
   
     before_handling = Time.now
-    theatre.handle "/my/special/namespace", :payload
+    theatre.trigger "/my/special/namespace", :payload
     after_handling = Time.now
     
-    handle_times.push after_handling - before_handling
+    trigger_times.push after_handling - before_handling
     
     # Update the running average
     #   count / (count+1) = current_average / reduced_average
@@ -37,7 +37,7 @@ loop do
     # 
     #         new_average = reduced_average + (data / (count + 1))
     
-    handle_count / (handle_count + 1)
+    trigger_count / (trigger_count + 1)
 
     sleep average_time
   

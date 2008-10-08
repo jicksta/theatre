@@ -13,7 +13,7 @@ Motivations and Design Decisions
 * Must maintain Ruby 1.8 and JRuby compatibility
 * Must be Thread-safe
 * Must provide some level of transparency into the events going through it
-* Must be dynamic enough to reallocate the number of handlers based on load
+* Must be dynamic enough to reallocate the number of triggerrs based on load
 * Must help facilitate test-driven development of Actor functionality
 * Must allow external persistence in case of a crash
 
@@ -39,16 +39,16 @@ Framework terminology
 
 Below are definitions of terms I use in Theatre. See the respective links for more information.
 
-* **callback**: This is the block given to the `each` method which handles events coming in.
+* **callback**: This is the block given to the `each` method which triggers events coming in.
 * **payload**: This is the "message" sent to the Theatre and is what will ultimately be yielded to the callback
 * **[Actor](http://en.wikipedia.org/wiki/Actor_model)**: This refers to concurrent responders to events in a concurrent system.
 
 Synchronous vs. Asynchronous
 ----------------------------
 
-With Theatre, all events are asynchronous with the optional ability to synchronously block until the event is scheduled, handled, and has returned. If you wish to synchronously handle the event, simple call `wait` on the `Invocation` object returned from `handle` and then check the `Invocation#current_state` property for `:success` or `:error`. Optionally the `Invocation#success?` and `Invocation#error?` methods also provide more intuitive access to the finished state. If the event finished with `:success`, you may retrieve the returned value of the event Proc by calling `Invocation#returned_value`. If the event finished with `:error`, you may get the Exception with `Invocation#error`
+With Theatre, all events are asynchronous with the optional ability to synchronously block until the event is scheduled, triggerd, and has returned. If you wish to synchronously trigger the event, simple call `wait` on the `Invocation` object returned from `trigger` and then check the `Invocation#current_state` property for `:success` or `:error`. Optionally the `Invocation#success?` and `Invocation#error?` methods also provide more intuitive access to the finished state. If the event finished with `:success`, you may retrieve the returned value of the event Proc by calling `Invocation#returned_value`. If the event finished with `:error`, you may get the Exception with `Invocation#error`
 
-    invocation = my_theatre.handle "your/namespace/here", YourSpecialClass.new("this object can be anything")
+    invocation = my_theatre.trigger "your/namespace/here", YourSpecialClass.new("this object can be anything")
     invocation.wait
     raise invocation.error if invocation.error?
     log "Actor finished with return value #{invocation.returned_value}"

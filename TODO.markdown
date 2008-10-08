@@ -15,4 +15,4 @@ Certain events should be executed as fast as possible. For example, in Adhearsio
 
 Handling within the caller's Thread
 -----------------------------------
-When calling Theatre#handle, maybe it'd make sense to have some events run within the caller's Thread instead of running it in another Thread. This should probably be split into a separate method called `handle_syncrhonously` or something.
+When calling Theatre#trigger, maybe it'd make sense to have some events run within the caller's Thread instead of running it in another Thread. This should probably be split into a separate method called `trigger_syncrhonously` or something.

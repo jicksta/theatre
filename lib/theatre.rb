@@ -34,8 +34,8 @@ module Theatre
     # @param [Object] payload The actual content to be sent to the callback
     # @raise Theatre::NamespaceNotFound Raised when told to enqueue an unrecognized namespace
     #
-    def handle(namespace, payload)
-      callback   = NamespaceManager.callbacks_for_namespace(namespace)
+    def trigger(namespace, payload)
+      callback   = @namespace_manager.callback_for_namespaces(namespace)
       invocation = Invocation.new(namespace, callback, payload)
       
       @master_queue << payload
@@ -47,6 +47,14 @@ module Theatre
     
     def load_events_file(file, *args)
       CallbackDefinitionLoader.new(self, *args).load_events_file(file)
+    end
+    
+    def register_namespace_name(*args)
+      @namespace_manager.register_namespace_name(*args)
+    end
+    
+    def register_callback_at_namespace(*args)
+      @namespace_manager.register_callback_at_namespace(*args)
     end
     
     def join
@@ -74,7 +82,7 @@ module Theatre
     
     ##
     # Notifies all Threads for this Theatre to stop by sending them special messages. Any messages which were queued and
-    # unhandled when this method is received will still be processed. Note: you may start this Theatre again later once it
+    # untriggered when this method is received will still be processed. Note: you may start this Theatre again later once it
     # has been stopped.
     #
     def graceful_stop!

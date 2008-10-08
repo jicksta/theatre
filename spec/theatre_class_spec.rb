@@ -27,10 +27,28 @@ describe "Theatre::Theatre" do
     theatre.graceful_stop!
   end
   
-  describe "handling events" do
+  describe '#trigger' do
+    
     it "should properly execute the block given" do
-      Theatre::Theatre.new
+      theatre = Theatre::Theatre.new
+      theatre.register_namespace_name "foobar"
+      has_ran = false
+      theatre.register_callback_at_namespace "foobar", lambda { |payload| has_ran = payload }
+      
+      theatre.trigger "foobar", true
+      theatre.graceful_stop!
+      theatre.join
+      
+      has_ran.should be_true
     end
+    
+    it "should return an Invocation" do
+      theatre = Theatre::Theatre.new
+      theatre.register_namespace_name "qaz"
+      theatre.register_callback_at_namespace "qaz", lambda {}
+      theatre.trigger("qaz").should be_instance_of(Theatre::Invocation)
+    end
+    
   end
   
   describe '#join' do
