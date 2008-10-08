@@ -14,6 +14,18 @@ require 'spec/rake/spectask'
 SPEC_GLOB = 'spec/**/*_spec.rb'
 GEMSPEC   = eval File.read("theatre.gemspec")
 
+begin
+  require 'rcov/rcovtask'
+  Rcov::RcovTask.new do |t|
+    t.test_files = Dir[*SPEC_GLOB]
+    t.output_dir = 'coverage'
+    t.verbose = true
+    t.rcov_opts.concat %w[--sort coverage --sort-reverse -x gems -x /var --no-validator-links]
+  end
+rescue LoadError
+  STDERR.puts "Could not load rcov tasks -- rcov does not appear to be installed. Continuing anyway."
+end
+
 Rake::GemPackageTask.new(GEMSPEC).define
 
 desc "Run all RSpecs"
