@@ -27,6 +27,26 @@ describe "Theatre::Theatre" do
     theatre.graceful_stop!
   end
   
+  describe "handling events" do
+    it "should properly execute the block given" do
+      Theatre::Theatre.new
+    end
+  end
+  
+  describe '#join' do
+    it "should execute join() on every ThreadGroup thread" do
+      thread_mocks = Array(3) do
+        bogus_thread = flexmock "bogus thread"
+        bogus_thread.should_receive(:join).once.and_return
+        bogus_thread
+      end
+      bogus_thread_group = flexmock "A ThreadGroup which returns an Array of mock Threads", :list => thread_mocks
+      theatre = Theatre::Theatre.new
+      theatre.send(:instance_variable_set, :@thread_group, bogus_thread_group)
+      theatre.join
+    end
+  end
+  
   describe '#thread_loop' do
     
     it "should continue looping even after an exception been raised" do

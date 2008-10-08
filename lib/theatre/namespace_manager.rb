@@ -57,14 +57,6 @@ module Theatre
       search_for_namespace(paths).callbacks
     end
     
-    def load_events_code(code, *args)
-      CallbackDefinitionLoader.new(self, *args).load_events_code(code)
-    end
-    
-    def load_events_file(file, *args)
-      CallbackDefinitionLoader.new(self, *args).load_events_file(file)
-    end
-    
     ##
     # Find a namespace in the tree.
     #

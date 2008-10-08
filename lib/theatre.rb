@@ -41,6 +41,24 @@ module Theatre
       @master_queue << payload
     end
     
+    def load_events_code(code, *args)
+      CallbackDefinitionLoader.new(self, *args).load_events_code(code)
+    end
+    
+    def load_events_file(file, *args)
+      CallbackDefinitionLoader.new(self, *args).load_events_file(file)
+    end
+    
+    def join
+      @thread_group.list.each do |thread|
+        begin
+          thread.join
+        rescue
+          # Ignore any exceptions
+        end
+      end
+    end
+    
     ##
     # Starts this Theatre.
     #
