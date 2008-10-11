@@ -58,6 +58,24 @@ describe "Theatre::Theatre" do
     
   end
   
+  describe '#trigger_immediately' do
+    it "should continue executing callbacks when a link in the chain raises an Exception" do
+      callbacks = [lambda { 1 }, lambda { raise LocalJumpError }, lambda { 3 }]
+      
+      theatre = Theatre::Theatre.new
+      theatre.register_namespace_name "breakage"
+      
+      callbacks.each do |callback|
+        theatre.register_callback_at_namespace "breakage", callback
+      end
+      
+      return_value = theatre.trigger_immediately("breakage")
+      return_value.first.should equal(1)
+      return_value[1].should be_instance_of(LocalJumpError)
+      return_value.last.should equal(3)
+    end
+  end
+  
   describe '#callbacks_for_namespaces' do
     it "should properly return Procs which have been registered against a namespace" do
       callback = lambda { :callback }

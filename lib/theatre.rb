@@ -28,7 +28,7 @@ module Theatre
     end
     
     ##
-    # Send a message to this Theatre for processing.
+    # Send a message to this Theatre for asynchronous processing.
     #
     # @param [String] namespace The namespace to which the payload should be sent
     # @param [Object] payload The actual content to be sent to the callback. Optional.
@@ -45,6 +45,30 @@ module Theatre
         invocation.queued
         @master_queue << invocation
         invocation
+      end
+    end
+    
+    ##
+    # Send a message to this Theatre for synchronous processing. The execution of this will not go through this Theatre's
+    # Thread pool. If an error occurred in any of callbacks, the Exception object will be placed in the returned Array 
+    # instead for you to act upon.
+    #
+    # @param [String] namespace The namespace to which the payload should be sent
+    # @param [Object] payload The actual content to be sent to the callback. Optional.
+    # @return [Array] An Array containing each callback's return value (or Exception raised, if any) when given the payload
+    # @raise Theatre::NamespaceNotFound Raised when told to enqueue an unrecognized namespace
+    #
+    def trigger_immediately(namespace, payload=:argument_undefined)
+      @namespace_manager.callbacks_for_namespaces(namespace).map do |callback|
+        begin
+          invocation = if payload.equal?(:argument_undefined)
+            callback.call
+          else
+            callback.call payload
+          end
+        rescue => captured_error_to_be_returned
+          captured_error_to_be_returned
+        end
       end
     end
     
