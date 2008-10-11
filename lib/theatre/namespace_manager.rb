@@ -53,7 +53,7 @@ module Theatre
     #
     # @raise NamespaceNotFound if a segment has not been registered yet
     #
-    def callback_for_namespaces(*paths)
+    def callbacks_for_namespaces(*paths)
       search_for_namespace(paths).callbacks
     end
     
@@ -84,6 +84,7 @@ module Theatre
     # @raise NamespaceNotFound if a segment has not been registered yet
     #
     def register_callback_at_namespace(paths, callback)
+      raise ArgumentError, "callback must be a Proc" unless callback.kind_of? Proc
       search_for_namespace(paths).register_callback callback
     end
     
@@ -106,7 +107,7 @@ module Theatre
       end
       
       def register_callback(callback)
-        @callbacks << callbacks
+        @callbacks << callback
         callback
       end
       

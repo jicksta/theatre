@@ -31,14 +31,21 @@ module Theatre
     # Send a message to this Theatre for processing.
     #
     # @param [String] namespace The namespace to which the payload should be sent
-    # @param [Object] payload The actual content to be sent to the callback
+    # @param [Object] payload The actual content to be sent to the callback. Optional.
+    # @return [Array<Theatre::Invocation>] An Array of Invocation objects
     # @raise Theatre::NamespaceNotFound Raised when told to enqueue an unrecognized namespace
     #
-    def trigger(namespace, payload)
-      callback   = @namespace_manager.callback_for_namespaces(namespace)
-      invocation = Invocation.new(namespace, callback, payload)
-      
-      @master_queue << payload
+    def trigger(namespace, payload=:argument_undefined)
+      @namespace_manager.callbacks_for_namespaces(namespace).map do |callback|
+        invocation = if payload.equal?(:argument_undefined)
+          Invocation.new(namespace, callback)
+        else
+          Invocation.new(namespace, callback, payload)
+        end
+        invocation.queued
+        @master_queue << invocation
+        invocation
+      end
     end
     
     def load_events_code(code, *args)
@@ -92,8 +99,9 @@ module Theatre
     
     protected
     
-    def warn(message)
-      # Not really implemented yet.
+    # This will use the Adhearsion logger eventually.
+    def warn(exception)
+      # STDERR.puts exception.message, *exception.backtrace
     end
     
     def thread_loop
@@ -109,5 +117,4 @@ module Theatre
     end
     
   end
-  
 end

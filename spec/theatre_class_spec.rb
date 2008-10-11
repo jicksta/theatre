@@ -30,25 +30,42 @@ describe "Theatre::Theatre" do
   describe '#trigger' do
     
     it "should properly execute the block given" do
-      theatre = Theatre::Theatre.new
-      theatre.register_namespace_name "foobar"
-      has_ran = false
-      theatre.register_callback_at_namespace "foobar", lambda { |payload| has_ran = payload }
       
-      theatre.trigger "foobar", true
+      has_ran = false
+      
+      theatre = Theatre::Theatre.new
+      theatre.register_namespace_name "cheezburger"
+      theatre.register_callback_at_namespace "cheezburger", lambda { |payload| has_ran = payload }
+      
+      theatre.start!
+      
+      theatre.trigger "cheezburger", :yes
       theatre.graceful_stop!
       theatre.join
       
-      has_ran.should be_true
+      has_ran.should equal(:yes)
     end
     
-    it "should return an Invocation" do
+    it "should return an Array of Invocation objects" do
       theatre = Theatre::Theatre.new
       theatre.register_namespace_name "qaz"
       theatre.register_callback_at_namespace "qaz", lambda {}
-      theatre.trigger("qaz").should be_instance_of(Theatre::Invocation)
+      return_value = theatre.trigger("qaz")
+      return_value.should be_instance_of(Array)
+      return_value.should have(1).item
+      return_value.first.should be_instance_of(Theatre::Invocation)
     end
     
+  end
+  
+  describe '#callbacks_for_namespaces' do
+    it "should properly return Procs which have been registered against a namespace" do
+      callback = lambda { :callback }
+      theatre = Theatre::Theatre.new
+      theatre.register_namespace_name "pumpkin"
+      theatre.register_callback_at_namespace "pumpkin", callback
+      theatre.namespace_manager.callbacks_for_namespaces("pumpkin").should eql([callback])
+    end
   end
   
   describe '#join' do

@@ -11,6 +11,8 @@ module Theatre
     
     attr_reader :queued_time, :started_time, :finished_time, :unique_id, :callback, :namespace, :error, :returned_value
     
+    class InvalidStateError < Exception; end
+    
     ##
     # Create a new Invocation.
     #
@@ -19,6 +21,7 @@ module Theatre
     # @param [Object] payload The message that will be sent to the callback for processing.
     #
     def initialize(namespace, callback, payload=:theatre_no_payload)
+      raise ArgumentError, "Callback must be a Proc" unless callback.kind_of? Proc
       @payload       = payload
       @unique_id     = new_guid.freeze
       @callback      = callback
@@ -34,7 +37,7 @@ module Theatre
     
     def queued
       with_state_lock do
-        return false unless @current_state == :new
+        raise InvalidStateError unless @current_state == :new
         @current_state = :queued
         @queued_time = Time.now.freeze
       end
@@ -47,10 +50,9 @@ module Theatre
     
     def start
       with_state_lock do
-        return false unless @current_state == :queued
+        raise InvalidStateError unless @current_state == :queued
         @current_state = :running
       end
-      
       @started_time = Time.now.freeze
       
       begin
