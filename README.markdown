@@ -46,9 +46,12 @@ Below are definitions of terms I use in Theatre. See the respective links for mo
 Synchronous vs. Asynchronous
 ----------------------------
 
-With Theatre, all events are asynchronous with the optional ability to synchronously block until the event is scheduled, triggerd, and has returned. If you wish to synchronously trigger the event, simple call `wait` on the `Invocation` object returned from `trigger` and then check the `Invocation#current_state` property for `:success` or `:error`. Optionally the `Invocation#success?` and `Invocation#error?` methods also provide more intuitive access to the finished state. If the event finished with `:success`, you may retrieve the returned value of the event Proc by calling `Invocation#returned_value`. If the event finished with `:error`, you may get the Exception with `Invocation#error`
+With Theatre, all events are asynchronous with the optional ability to synchronously block until the event is scheduled, triggered, and has returned. If you wish to synchronously trigger the event, simple call `wait` on an `Invocation` object returned from `trigger` and then check the `Invocation#current_state` property for `:success` or `:error`. Optionally the `Invocation#success?` and `Invocation#error?` methods also provide more intuitive access to the finished state. If the event finished with `:success`, you may retrieve the returned value of the event Proc by calling `Invocation#returned_value`. If the event finished with `:error`, you may get the Exception with `Invocation#error`.
 
-    invocation = my_theatre.trigger "your/namespace/here", YourSpecialClass.new("this object can be anything")
+Because many callbacks can be registered for a particular namespace, each needing its own Invocation object, the `Theatre#trigger` method returns an Array of Invocation objects.
+
+    # We'll assume only one callback is registered and call #first on the Array of Invocations returned by #trigger
+    invocation = my_theatre.trigger("your/namespace/here", YourSpecialClass.new("this can be anything")).first
     invocation.wait
     raise invocation.error if invocation.error?
     log "Actor finished with return value #{invocation.returned_value}"
